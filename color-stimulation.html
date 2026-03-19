@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Color Stimulation — Two-Color System</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Lora:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #fff;
+    color: #1a1a1a;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── COLOR DISPLAY ─── */
+  .color-pair {
+    position: relative;
+    display: flex;
+    width: 100%;
+    height: 68vh;
+    min-height: 380px;
+    max-height: 600px;
+    cursor: crosshair;
+    transition: background 0.05s;
+  }
+
+  #seamGlow {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    background: radial-gradient(ellipse at center, white 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .color-half {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 24px;
+    transition: background-color 0.15s ease;
+  }
+
+  .color-half .info {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    text-align: center;
+    line-height: 1.6;
+    transition: color 0.2s;
+  }
+
+  .color-half .info .role {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.55;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  /* ─── SLIDER AREA ─── */
+  .controls-bar {
+    padding: 32px 40px 28px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .slider-row {
+    margin-bottom: 24px;
+  }
+
+  .slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
+  }
+
+  .slider-header .slider-label {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #888;
+  }
+
+  .slider-header .slider-val {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: #555;
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 2px;
+    background: #ddd;
+    border-radius: 1px;
+    outline: none;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #1a1a1a;
+    cursor: grab;
+    border: 3px solid #fff;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  input[type="range"]::-webkit-slider-thumb:active {
+    cursor: grabbing;
+    transform: scale(1.1);
+  }
+
+  .slider-endpoints {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    color: #bbb;
+  }
+
+  /* ─── PROPERTIES ─── */
+  .properties-row {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    padding: 0 40px 32px;
+    flex-wrap: wrap;
+  }
+
+  .prop {
+    text-align: center;
+  }
+
+  .prop .prop-val {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 22px;
+    font-weight: 400;
+    color: #1a1a1a;
+  }
+
+  .prop .prop-label {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 500;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #aaa;
+    margin-top: 5px;
+  }
+
+  /* ─── DIVIDER ─── */
+  .divider {
+    width: 48px;
+    height: 1px;
+    background: #ddd;
+    margin: 0 auto 40px;
+  }
+
+  /* ─── RESEARCH SECTION ─── */
+  .research {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 40px 56px;
+  }
+
+  .research h2 {
+    font-family: 'Lora', Georgia, serif;
+    font-weight: 600;
+    font-size: 32px;
+    line-height: 1.25;
+    margin-bottom: 24px;
+    color: #1a1a1a;
+  }
+
+  .research p {
+    font-size: 16px;
+    color: #444;
+    margin-bottom: 18px;
+  }
+
+  .research p strong {
+    color: #1a1a1a;
+    font-weight: 500;
+  }
+
+  .research .cite {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: #999;
+    line-height: 1.9;
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px solid #eee;
+  }
+
+  .research .cite a {
+    color: #777;
+  }
+
+  /* ─── COLOR CHIPS ─── */
+  .color-chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin: 20px 0;
+  }
+
+  .chip {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    position: relative;
+    cursor: default;
+    transition: transform 0.15s;
+    border: 1px solid rgba(0,0,0,0.06);
+  }
+
+  .chip:hover {
+    transform: scale(1.15);
+  }
+
+  .chip .chip-tip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a1a1a;
+    color: #fff;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    padding: 5px 9px;
+    border-radius: 4px;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  .chip:hover .chip-tip { display: block; }
+
+  .avoid-label {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    color: #bbb;
+    margin-top: 14px;
+  }
+
+  /* ─── SAVED SECTION ─── */
+  .saved-area {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 40px 48px;
+  }
+
+  .saved-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .saved-header h3 {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #888;
+  }
+
+  .save-btn {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #888;
+    background: none;
+    border: 1px solid #ddd;
+    padding: 7px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .save-btn:hover {
+    color: #222;
+    border-color: #999;
+  }
+
+  .saved-pairs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    min-height: 44px;
+  }
+
+  .saved-pair {
+    display: flex;
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid rgba(0,0,0,0.08);
+    transition: transform 0.15s, box-shadow 0.2s;
+  }
+
+  .saved-pair:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+
+  .saved-pair .sp-half {
+    width: 32px;
+    height: 40px;
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 32px 40px;
+    border-top: 1px solid #eee;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    color: #bbb;
+    line-height: 1.8;
+  }
+
+  footer a { color: #999; }
+</style>
+</head>
+<body>
+
+<!-- ─── COLOR DISPLAY ─── -->
+<div class="color-pair" id="colorPair">
+  <div class="color-half" id="fieldHalf" style="background:#0e2e5a">
+    <div class="info" id="fieldInfo" style="color:rgba(255,255,255,0.6)">
+      <span class="role">Field</span>
+      #0E2E5A
+    </div>
+  </div>
+  <div class="color-half" id="patternHalf" style="background:#122f58">
+    <div class="info" id="patternInfo" style="color:rgba(255,255,255,0.6)">
+      <span class="role">Pattern</span>
+      #122F58
+    </div>
+  </div>
+</div>
+
+<!-- ─── CONTROLS ─── -->
+<div class="controls-bar">
+  <div class="slider-row">
+    <div class="slider-header">
+      <span class="slider-label">Stimulation</span>
+      <span class="slider-val" id="stimVal">15</span>
+    </div>
+    <input type="range" id="stimSlider" min="0" max="100" value="15">
+    <div class="slider-endpoints">
+      <span>Calm</span>
+      <span>Energizing</span>
+    </div>
+  </div>
+  <div class="slider-row">
+    <div class="slider-header">
+      <span class="slider-label">Temperature</span>
+      <span class="slider-val" id="tempVal">Cool</span>
+    </div>
+    <input type="range" id="tempSlider" min="0" max="100" value="20">
+    <div class="slider-endpoints">
+      <span>Cool</span>
+      <span>Warm</span>
+    </div>
+  </div>
+</div>
+
+<!-- ─── PROPERTIES ─── -->
+<div class="properties-row">
+  <div class="prop">
+    <div class="prop-val" id="pHueDist">12°</div>
+    <div class="prop-label">Hue distance</div>
+  </div>
+  <div class="prop">
+    <div class="prop-val" id="pIntSep">8%</div>
+    <div class="prop-label">Intensity gap</div>
+  </div>
+  <div class="prop">
+    <div class="prop-val" id="pValCon">5%</div>
+    <div class="prop-label">Value contrast</div>
+  </div>
+  <div class="prop">
+    <div class="prop-val" id="pStimLevel">Low</div>
+    <div class="prop-label">Stimulation</div>
+  </div>
+</div>
+
+<!-- ─── SAVED ─── -->
+<div class="saved-area">
+  <div class="saved-header">
+    <h3>Saved Pairs</h3>
+    <button class="save-btn" id="saveBtn">+ Save</button>
+  </div>
+  <div class="saved-pairs" id="savedPairs"></div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ─── RESEARCH ─── -->
+<div class="research">
+  <h2>How the colors are chosen</h2>
+
+  <p>This tool generates two-color combinations for an immersive projection room. A patient holds a soft controller — <strong>squeezing it increases the stimulation</strong> between the two colors. Releasing lets them converge back to a calm, almost uniform field.</p>
+
+  <p>The stimulation model follows <strong>Ruxandra Duru's framework</strong>: three properties control how stimulating a color pair feels — overall intensity, hue distance, and light-dark contrast. Push them up together and the pair becomes energizing. Pull them down and it becomes calming. The squeeze controller acts as a single fader for all three.</p>
+
+  <p>The <strong>temperature axis</strong> (controller tilt) shifts both colors through cool blues, neutral teals, and warm ambers. Both colors always stay related in temperature — they share a family, even as their stimulation diverges.</p>
+
+  <p>At <strong>zero stimulation</strong>, the two colors are nearly identical — the projection room becomes a pure color wash, like a James Turrell light installation. As stimulation increases, a reaction-diffusion pattern becomes visible between the two colors: organic, living channels and spots that the patient's gestures are shaping.</p>
+
+  <p><strong>Color-emotion associations</strong> are drawn from a 30-country survey of 4,598 participants. Most colors map to positive emotions. Only brown, grey, and black are universally negative — the system avoids these entirely. Red is the most emotionally complex color (both love and anger). Pink has the strongest consensus for love and pleasure.</p>
+
+  <div class="color-chips" id="researchChips"></div>
+  <div class="avoid-label">↑ Research-backed associations. Dark tones (brown, grey, black) are avoided in the system.</div>
+
+  <div class="cite">
+    Jonauskaite, D. et al. (2020). Universal Patterns in Color-Emotion Associations Are Further Shaped by Linguistic and Geographic Proximity. <em>Psychological Science, 31</em>(10), 1245–1260.<br><br>
+    Duru, R. (2022). Two-Color Combinations: A Toolkit. <em>The Startup / Medium.</em><br><br>
+    Duru, R. (2024). Rethinking Color Theory. <a href="https://design.google/library/color-theory-ruxandra-duru" target="_blank">Google Design.</a><br><br>
+    <a href="https://colormoods.co" target="_blank">colormoods.co</a> — Interactive stimulation-based palette generator by Duru &amp; Li.
+  </div>
+</div>
+
+<footer>
+  Color Stimulation Explorer — Behavioral Clinic Immersive Projection Project<br>
+  Built as a design reference tool for collaborators.
+</footer>
+
+<script>
+// ─── COLOR ENGINE ────────────────────────────────────────
+function hslToRgb(h, s, l) {
+  h = ((h % 360) + 360) % 360;
+  s /= 100; l /= 100;
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+  const m = l - c / 2;
+  let r, g, b;
+  if (h < 60)       { r = c; g = x; b = 0; }
+  else if (h < 120) { r = x; g = c; b = 0; }
+  else if (h < 180) { r = 0; g = c; b = x; }
+  else if (h < 240) { r = 0; g = x; b = c; }
+  else if (h < 300) { r = x; g = 0; b = c; }
+  else              { r = c; g = 0; b = x; }
+  return [Math.round((r+m)*255), Math.round((g+m)*255), Math.round((b+m)*255)];
+}
+
+function rgbHex(r, g, b) {
+  return '#' + [r,g,b].map(v => Math.max(0,Math.min(255,v)).toString(16).padStart(2,'0')).join('');
+}
+
+function luminance(r, g, b) {
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+}
+
+function generatePair(stim, temp) {
+  // Base hue: cool(0)=220° → warm(1)=25°
+  const baseHue = 220 - temp * 195;
+
+  // Field — projection-compensated: wall projection loses saturation,
+  // so floor at 82%; lift lightness floor to 34% so darks stay chromatic
+  const fSat = 82 + stim * 13;        // 82→95%
+  const fLight = 34 + stim * 16;      // 34→50%
+
+  // Pattern — stim^1.5 gives better spread across range vs. stim^2
+  // (quadratic kept pattern too similar through the first 50% of travel)
+  const hueDist = Math.pow(stim, 1.5) * 155;
+  const pHue = baseHue + hueDist;
+
+  // Boost saturation when pattern hue lands in yellow/chartreuse band (50-110°)
+  // — these hues read muddy at moderate saturation on projection surfaces
+  const pHueN = ((pHue % 360) + 360) % 360;
+  const muddyBoost = (pHueN > 50 && pHueN < 110) ? 6 : 0;
+  const pSat = Math.min(100, 80 + stim * 18 + muddyBoost);
+  const pLight = fLight + stim * stim * 20;
+
+  const fRgb = hslToRgb(baseHue, fSat, fLight);
+  const pRgb = hslToRgb(pHue, pSat, pLight);
+
+  return {
+    field: { rgb: fRgb, hex: rgbHex(...fRgb) },
+    pattern: { rgb: pRgb, hex: rgbHex(...pRgb) },
+    hueDist: Math.round(hueDist),
+    intSep: Math.round(Math.abs(pSat - fSat)),
+    valCon: Math.round(Math.abs(pLight - fLight)),
+  };
+}
+
+// ─── UI ──────────────────────────────────────────────────
+const stimSlider = document.getElementById('stimSlider');
+const tempSlider = document.getElementById('tempSlider');
+const fieldHalf = document.getElementById('fieldHalf');
+const patternHalf = document.getElementById('patternHalf');
+const fieldInfo = document.getElementById('fieldInfo');
+const patternInfo = document.getElementById('patternInfo');
+
+function getTempLabel(v) {
+  if (v < 18) return 'Deep cool';
+  if (v < 38) return 'Cool';
+  if (v < 55) return 'Neutral';
+  if (v < 75) return 'Warm';
+  return 'Hot';
+}
+
+function getStimLabel(v) {
+  if (v < 12) return 'Minimal';
+  if (v < 28) return 'Low';
+  if (v < 48) return 'Moderate';
+  if (v < 68) return 'Elevated';
+  if (v < 85) return 'High';
+  return 'Peak';
+}
+
+let currentPair = null;
+
+function update() {
+  const stim = parseInt(stimSlider.value) / 100;
+  const temp = parseInt(tempSlider.value) / 100;
+
+  document.getElementById('stimVal').textContent = stimSlider.value;
+  document.getElementById('tempVal').textContent = getTempLabel(parseInt(tempSlider.value));
+
+  currentPair = generatePair(stim, temp);
+
+  fieldHalf.style.backgroundColor = currentPair.field.hex;
+  patternHalf.style.backgroundColor = currentPair.pattern.hex;
+
+  const fLum = luminance(...currentPair.field.rgb);
+  const pLum = luminance(...currentPair.pattern.rgb);
+  fieldInfo.style.color = fLum > 0.45 ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.6)';
+  patternInfo.style.color = pLum > 0.45 ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.6)';
+
+  fieldInfo.innerHTML = `<span class="role">Field</span>${currentPair.field.hex}`;
+  patternInfo.innerHTML = `<span class="role">Pattern</span>${currentPair.pattern.hex}`;
+
+  document.getElementById('pHueDist').textContent = currentPair.hueDist + '°';
+  document.getElementById('pIntSep').textContent = currentPair.intSep + '%';
+  document.getElementById('pValCon').textContent = currentPair.valCon + '%';
+  document.getElementById('pStimLevel').textContent = getStimLabel(parseInt(stimSlider.value));
+
+}
+
+stimSlider.addEventListener('input', update);
+tempSlider.addEventListener('input', update);
+
+// ─── SAVE PAIRS ──────────────────────────────────────────
+const savedPairsEl = document.getElementById('savedPairs');
+const saved = [];
+
+document.getElementById('saveBtn').addEventListener('click', () => {
+  if (!currentPair) return;
+  saved.push({
+    f: currentPair.field.hex,
+    p: currentPair.pattern.hex,
+    stim: stimSlider.value,
+    temp: tempSlider.value
+  });
+  renderSaved();
+});
+
+function renderSaved() {
+  savedPairsEl.innerHTML = '';
+  saved.forEach((s, i) => {
+    const el = document.createElement('div');
+    el.className = 'saved-pair';
+    el.title = `Stim: ${s.stim} / Temp: ${s.temp}\n${s.f} + ${s.p}`;
+    el.innerHTML = `<div class="sp-half" style="background:${s.f}"></div><div class="sp-half" style="background:${s.p}"></div>`;
+    el.addEventListener('click', () => {
+      stimSlider.value = s.stim;
+      tempSlider.value = s.temp;
+      update();
+    });
+    savedPairsEl.appendChild(el);
+  });
+}
+
+// ─── RESEARCH COLOR CHIPS ────────────────────────────────
+const researchColors = [
+  { hex: '#cc3333', label: 'Red — Love 68%, Anger' },
+  { hex: '#dd7722', label: 'Orange — Joy 44%' },
+  { hex: '#ddcc22', label: 'Yellow — Joy 52%' },
+  { hex: '#44aa55', label: 'Green — Contentment 39%' },
+  { hex: '#44aabb', label: 'Turquoise — Pleasure 35%' },
+  { hex: '#3366bb', label: 'Blue — Relief 35%' },
+  { hex: '#7744aa', label: 'Purple — Pleasure 25% (lowest consensus)' },
+  { hex: '#dd6699', label: 'Pink — Love 50%' },
+  { hex: '#e8e8e8', label: 'White — Relief 43%' },
+  { hex: '#775533', label: 'Brown — Disgust 36% ⚠ AVOID' },
+  { hex: '#888888', label: 'Grey — Sadness 48% ⚠ AVOID' },
+  { hex: '#222222', label: 'Black — Sadness 51% ⚠ AVOID' },
+];
+
+const chipsEl = document.getElementById('researchChips');
+researchColors.forEach(c => {
+  const chip = document.createElement('div');
+  chip.className = 'chip';
+  chip.style.background = c.hex;
+  chip.innerHTML = `<div class="chip-tip">${c.label}</div>`;
+  chipsEl.appendChild(chip);
+});
+
+// ─── INIT ────────────────────────────────────────────────
+update();
+</script>
+</body>
+</html>
