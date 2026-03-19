@@ -368,7 +368,7 @@
       #122F58
     </div>
   </div>
-  <div id="seamGlow" aria-hidden="true"></div>
+  <div id="seamGlow" aria-hidden="true" style="width:0;opacity:0"></div>
 </div>
 
 <!-- ─── CONTROLS ─── -->
@@ -642,12 +642,12 @@ function animateGlow(ts) {
 
   const stim = parseInt(stimSlider.value) / 100;
 
-  const speed  = 4.0 + (0.7  - 4.0)  * stim;
+  const period = 4.0 + (0.7  - 4.0)  * stim;   // seconds per cycle: 4.0s → 0.7s
   const width  = 80  + (200  - 80)   * stim;
   const peak   = 0.12 + (0.55 - 0.12) * stim;
   const trough = peak * 0.15;
 
-  glowPhase += (2 * Math.PI / speed) * dt;
+  glowPhase += (2 * Math.PI / period) * dt;
   const t = (Math.sin(glowPhase) + 1) / 2;
   const opacity = trough + (peak - trough) * t;
 
