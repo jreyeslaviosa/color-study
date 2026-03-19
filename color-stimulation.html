@@ -631,6 +631,34 @@ researchColors.forEach(c => {
 });
 
 // ─── INIT ────────────────────────────────────────────────
+let glowPhase = 0;
+let glowPrevTime = null;
+const seamGlow = document.getElementById('seamGlow');
+
+function animateGlow(ts) {
+  if (glowPrevTime === null) glowPrevTime = ts;
+  const dt = Math.min((ts - glowPrevTime) / 1000, 0.1);
+  glowPrevTime = ts;
+
+  const stim = parseInt(stimSlider.value) / 100;
+
+  const speed  = 4.0 + (0.7  - 4.0)  * stim;
+  const width  = 80  + (200  - 80)   * stim;
+  const peak   = 0.12 + (0.55 - 0.12) * stim;
+  const trough = peak * 0.15;
+
+  glowPhase += (2 * Math.PI / speed) * dt;
+  const t = (Math.sin(glowPhase) + 1) / 2;
+  const opacity = trough + (peak - trough) * t;
+
+  seamGlow.style.width      = width + 'px';
+  seamGlow.style.marginLeft = (-width / 2) + 'px';
+  seamGlow.style.opacity    = opacity;
+
+  requestAnimationFrame(animateGlow);
+}
+
+requestAnimationFrame(animateGlow);
 update();
 </script>
 </body>
