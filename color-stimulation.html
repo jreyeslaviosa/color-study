@@ -267,6 +267,30 @@
     margin-top: 14px;
   }
 
+  /* ─── RD SECTION ─── */
+  .rd-section {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 40px 40px;
+  }
+
+  .rd-label {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #bbb;
+    margin-bottom: 12px;
+  }
+
+  #rdCanvas {
+    width: 100%;
+    display: block;
+    border-radius: 6px;
+    image-rendering: auto;
+  }
+
   /* ─── SAVED SECTION ─── */
   .saved-area {
     max-width: 640px;
@@ -417,6 +441,12 @@
   </div>
 </div>
 
+<!-- ─── RD SECTION ─── -->
+<div class="rd-section">
+  <div class="rd-label">Reaction-diffusion</div>
+  <canvas id="rdCanvas" aria-hidden="true"></canvas>
+</div>
+
 <!-- ─── SAVED ─── -->
 <div class="saved-area">
   <div class="saved-header">
@@ -517,6 +547,77 @@ function generatePair(stim, temp) {
   };
 }
 
+// ─── GRAY-SCOTT REACTION-DIFFUSION ───────────────────────
+const RD = (() => {
+  const W = 280, H = 140, n = W * H;
+  let U = new Float32Array(n), V = new Float32Array(n);
+  let nU = new Float32Array(n), nV = new Float32Array(n);
+  let canvas, ctx, imgData;
+  let fRgb = [22, 55, 144], pRgb = [22, 55, 144];
+
+  // Labyrinthine/coral parameters — matches reference image style
+  const Du = 0.2097, Dv = 0.105, f = 0.037, k = 0.064, dt = 0.9;
+
+  function seed() {
+    U.fill(1); V.fill(0);
+    // Single center seed — grows outward organically like reference image
+    const cx = W / 2 | 0, cy = H / 2 | 0;
+    for (let dy = -5; dy <= 5; dy++) {
+      for (let dx = -5; dx <= 5; dx++) {
+        if (dx * dx + dy * dy <= 25) {
+          const px = (cx + dx + W) % W, py = (cy + dy + H) % H;
+          U[py * W + px] = 0.5 + (Math.random() - 0.5) * 0.1;
+          V[py * W + px] = 0.25 + (Math.random() - 0.5) * 0.05;
+        }
+      }
+    }
+  }
+
+  function step(iters) {
+    for (let it = 0; it < iters; it++) {
+      for (let y = 0; y < H; y++) {
+        const yN = ((y - 1 + H) % H) * W, yS = ((y + 1) % H) * W, yC = y * W;
+        for (let x = 0; x < W; x++) {
+          const i = yC + x, xE = (x + 1) % W, xW = (x - 1 + W) % W;
+          const lu = U[yN+x] + U[yS+x] + U[yC+xW] + U[yC+xE] - 4*U[i];
+          const lv = V[yN+x] + V[yS+x] + V[yC+xW] + V[yC+xE] - 4*V[i];
+          const uvv = U[i] * V[i] * V[i];
+          nU[i] = Math.max(0, Math.min(1, U[i] + dt*(Du*lu - uvv + f*(1-U[i]))));
+          nV[i] = Math.max(0, Math.min(1, V[i] + dt*(Dv*lv + uvv - (f+k)*V[i])));
+        }
+      }
+      let t = U; U = nU; nU = t; t = V; V = nV; nV = t;
+    }
+  }
+
+  function render() {
+    const d = imgData.data;
+    for (let i = 0; i < n; i++) {
+      const raw = V[i] * 4.5;
+      const s = raw >= 1 ? 1 : Math.max(0, raw * raw * (3 - 2 * raw)); // smoothstep
+      d[i*4]   = (fRgb[0] + (pRgb[0] - fRgb[0]) * s) | 0;
+      d[i*4+1] = (fRgb[1] + (pRgb[1] - fRgb[1]) * s) | 0;
+      d[i*4+2] = (fRgb[2] + (pRgb[2] - fRgb[2]) * s) | 0;
+      d[i*4+3] = 255;
+    }
+    ctx.putImageData(imgData, 0, 0);
+  }
+
+  function tick() { step(3); render(); requestAnimationFrame(tick); }
+
+  return {
+    init(cvs) {
+      canvas = cvs;
+      canvas.width = W; canvas.height = H;
+      ctx = canvas.getContext('2d');
+      imgData = ctx.createImageData(W, H);
+      seed();
+      requestAnimationFrame(tick);
+    },
+    setColors(fr, pr) { fRgb = fr; pRgb = pr; }
+  };
+})();
+
 // ─── UI ──────────────────────────────────────────────────
 const stimSlider = document.getElementById('stimSlider');
 const tempSlider = document.getElementById('tempSlider');
@@ -569,6 +670,7 @@ function update() {
   document.getElementById('pValCon').textContent = currentPair.valCon + '%';
   document.getElementById('pStimLevel').textContent = getStimLabel(parseInt(stimSlider.value));
 
+  RD.setColors(currentPair.field.rgb, currentPair.pattern.rgb);
 }
 
 stimSlider.addEventListener('input', update);
@@ -658,6 +760,7 @@ function animateGlow(ts) {
   requestAnimationFrame(animateGlow);
 }
 
+RD.init(document.getElementById('rdCanvas'));
 requestAnimationFrame(animateGlow);
 update();
 </script>
