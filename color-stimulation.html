@@ -549,14 +549,14 @@ function generatePair(stim, temp) {
 
 // ─── GRAY-SCOTT REACTION-DIFFUSION ───────────────────────
 const RD = (() => {
-  const W = 280, H = 140, n = W * H;
+  const W = 560, H = 280, n = W * H;
   let U = new Float32Array(n), V = new Float32Array(n);
   let nU = new Float32Array(n), nV = new Float32Array(n);
   let canvas, ctx, imgData;
   let fRgb = [22, 55, 144], pRgb = [22, 55, 144];
 
   // Labyrinthine/coral parameters — matches reference image style
-  const Du = 0.2097, Dv = 0.105, f = 0.037, k = 0.064, dt = 0.9;
+  const Du = 0.2097, Dv = 0.105, f = 0.035, k = 0.060, dt = 1.0;
 
   function seed() {
     U.fill(1); V.fill(0);
@@ -593,7 +593,7 @@ const RD = (() => {
   function render() {
     const d = imgData.data;
     for (let i = 0; i < n; i++) {
-      const raw = V[i] * 4.5;
+      const raw = V[i] * 6;
       const s = raw >= 1 ? 1 : Math.max(0, raw * raw * (3 - 2 * raw)); // smoothstep
       d[i*4]   = (fRgb[0] + (pRgb[0] - fRgb[0]) * s) | 0;
       d[i*4+1] = (fRgb[1] + (pRgb[1] - fRgb[1]) * s) | 0;
@@ -605,7 +605,7 @@ const RD = (() => {
 
   let tickCount = 0;
   function tick() {
-    step(3);
+    step(2);
     tickCount++;
     if (tickCount % 60 === 0) {
       let filled = 0;
