@@ -601,6 +601,11 @@ const RD = (() => {
       d[i*4+3] = 255;
     }
     ctx.putImageData(imgData, 0, 0);
+    // Red origin marker — visible in all reference frames
+    ctx.fillStyle = '#ff2200';
+    ctx.beginPath();
+    ctx.arc(W / 2, H / 2, 3, 0, Math.PI * 2);
+    ctx.fill();
   }
 
   let tickCount = 0;
