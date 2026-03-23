@@ -608,13 +608,8 @@ const RD = (() => {
     ctx.fill();
   }
 
-  let lastSeedTime = 0;
-  function tick(ts) {
+  function tick() {
     step(1);
-    if (ts - lastSeedTime > 20000) { // reseed every 20 seconds
-      seed();
-      lastSeedTime = ts;
-    }
     render();
     requestAnimationFrame(tick);
   }
