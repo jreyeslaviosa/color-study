@@ -603,7 +603,18 @@ const RD = (() => {
     ctx.putImageData(imgData, 0, 0);
   }
 
-  function tick() { step(3); render(); requestAnimationFrame(tick); }
+  let tickCount = 0;
+  function tick() {
+    step(3);
+    tickCount++;
+    if (tickCount % 60 === 0) {
+      let filled = 0;
+      for (let i = 0; i < n; i++) { if (V[i] > 0.1) filled++; }
+      if (filled / n > 0.75) seed();
+    }
+    render();
+    requestAnimationFrame(tick);
+  }
 
   return {
     init(cvs) {
