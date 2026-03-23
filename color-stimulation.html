@@ -555,8 +555,8 @@ const RD = (() => {
   let canvas, ctx, imgData;
   let fRgb = [22, 55, 144], pRgb = [22, 55, 144];
 
-  // Labyrinthine/coral parameters — matches reference image style
-  const Du = 0.2097, Dv = 0.105, f = 0.035, k = 0.060, dt = 1.0;
+  // Mixed worms + dots — transition zone between alpha (spots) and gamma (worms)
+  const Du = 0.2097, Dv = 0.105, f = 0.028, k = 0.057, dt = 0.85;
 
   function seed() {
     U.fill(1); V.fill(0);
@@ -605,12 +605,21 @@ const RD = (() => {
 
   let tickCount = 0;
   function tick() {
-    step(2);
+    step(1);
     tickCount++;
+    // Sample center 60% of canvas — the blob never reaches corners so
+    // checking all pixels makes the 75% threshold unreachable
     if (tickCount % 60 === 0) {
-      let filled = 0;
-      for (let i = 0; i < n; i++) { if (V[i] > 0.1) filled++; }
-      if (filled / n > 0.75) seed();
+      const x0 = W * 0.2 | 0, x1 = W * 0.8 | 0;
+      const y0 = H * 0.2 | 0, y1 = H * 0.8 | 0;
+      let filled = 0, total = 0;
+      for (let y = y0; y < y1; y++) {
+        for (let x = x0; x < x1; x++) {
+          if (V[y * W + x] > 0.1) filled++;
+          total++;
+        }
+      }
+      if (filled / total > 0.68) seed();
     }
     render();
     requestAnimationFrame(tick);
